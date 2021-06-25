@@ -10,11 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80cc0b08b44afff489428955c964f165, type: 3}
-  m_Name: Osiris
+  m_Name: Amun's Splendor
   m_EditorClassIdentifier: 
-  name: Osiris
-  god: 1
-  type: 2
-  cardColor: {r: 0.15205587, g: 0.6320754, b: 0.1905762, a: 1}
-  descriptionText: The God of the Underworld, Death, and Fertility
-  artwork: {fileID: 21300000, guid: 5ca0cdcbe3a70694daa6e03a460e758c, type: 3}
+  name: Amun's Splendor
+  type: 0
+  cardColor: {r: 0, g: 0, b: 0, a: 0}
+  descriptionText: Your god becomes the color of target destroyed god
+  artwork: {fileID: 21300000, guid: 33a4a646cb1e86d41b57d95d3e15e949, type: 3}
+  destroyed: 0
+  action: 1

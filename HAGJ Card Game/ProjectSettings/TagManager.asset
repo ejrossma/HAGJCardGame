@@ -6,6 +6,9 @@ TagManager:
   tags:
   - GodDeck
   - InPlay
+  - Action
+  - Opponent
+  - SkipButton
   layers:
   - Default
   - TransparentFX

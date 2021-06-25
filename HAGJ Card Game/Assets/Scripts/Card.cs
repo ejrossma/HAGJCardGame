@@ -13,12 +13,19 @@ public class Card : ScriptableObject
     public string descriptionText; //for gods this will describe what the god represents
     public Sprite artwork; //sprite of the artwork to be displayed onto our card
 
+    public bool destroyed; //if the god has been destroyed
+    public bool action; //if the card is an action
+
+    void start()
+    {
+        destroyed = false;
+    }
+
     public void Print()
     {
         Debug.Log("name: " + name);
         Debug.Log("type: " + type);
         Debug.Log("description: " + descriptionText);
     }
-
 
 }

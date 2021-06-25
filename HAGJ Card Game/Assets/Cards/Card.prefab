@@ -167,6 +167,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4970901122282236950}
   - component: {fileID: 4970901122282236945}
+  - component: {fileID: 5832671984561411983}
   m_Layer: 0
   m_Name: Card
   m_TagString: Untagged
@@ -205,17 +206,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a26f4f6a27def5c44a26bc9ffd68282e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  deck:
-  - {fileID: 11400000, guid: 6878050c579ceef48beabbfb8bd87fcf, type: 2}
-  - {fileID: 11400000, guid: 6878050c579ceef48beabbfb8bd87fcf, type: 2}
-  - {fileID: 11400000, guid: 7e0a73c4fa3013e448b99e5837bf2478, type: 2}
-  - {fileID: 11400000, guid: 7e0a73c4fa3013e448b99e5837bf2478, type: 2}
-  - {fileID: 11400000, guid: b7f844c6db7d6ed4e834efe86bb1ad9e, type: 2}
-  - {fileID: 11400000, guid: b7f844c6db7d6ed4e834efe86bb1ad9e, type: 2}
+  displayCard: {fileID: 0}
   nameText: {fileID: 4970901122742227940}
   artworkImage: {fileID: 4970901122750298675}
   descriptionText: {fileID: 4970901122645069275}
   typeBox: {fileID: 4970901121886735816}
+  selected: 0
+--- !u!61 &5832671984561411983
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4970901122282236951}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0.0000076293945, y: -0.2793045}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 145.12065, y: 122.77637}
+  m_EdgeRadius: 0
 --- !u!1 &4970901122645069273
 GameObject:
   m_ObjectHideFlags: 0
@@ -329,8 +351,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 7.1, y: 45.9}
-  m_SizeDelta: {x: 209.1752, y: 68.9032}
+  m_AnchoredPosition: {x: 1.5, y: 46.1}
+  m_SizeDelta: {x: 457.2848, y: 68.9032}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4970901122742227943
 CanvasRenderer:
@@ -367,7 +389,7 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 6
     m_MaxSize: 60
-    m_Alignment: 0
+    m_Alignment: 1
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 1
