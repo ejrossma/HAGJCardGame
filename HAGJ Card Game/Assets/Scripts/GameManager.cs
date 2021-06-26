@@ -1,9 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
@@ -17,6 +16,9 @@ public class GameManager : MonoBehaviour
     public Card[] playerDeck;
     public Card[] opponentDeck;
     public Card[] actionDeck;
+
+    //ENEMY AI HELPER VARIABLES
+    private int lastGod; //1 = red, 2 = green, 3 = blue
 
     private GameObject skipButton;
 
@@ -47,6 +49,16 @@ public class GameManager : MonoBehaviour
         //set initial state
         state = State.GodSelection;
 
+        foreach (Card god in playerDeck)
+        {
+            god.destroyed = false;
+        }
+
+        foreach (Card god in opponentDeck)
+        {
+            god.destroyed = false;
+        }
+
         //hide all elements besides choosing card from god deck
         inPlay = GameObject.FindGameObjectsWithTag("InPlay");
         foreach (GameObject god in inPlay)
@@ -70,6 +82,8 @@ public class GameManager : MonoBehaviour
         playerDeck = playerObj[0].GetComponent<Base>().godDeck;
         opponentDeck = opponentObj[0].GetComponent<Base>().godDeck;
 
+        lastGod = 0;
+
     }
 
     // Update is called once per frame
@@ -87,6 +101,8 @@ public class GameManager : MonoBehaviour
                     //then display the new one
                     inPlay[0].GetComponent<CardDisplay>().displayCard = god.GetComponent<CardDisplay>().displayCard;
                     inPlay[0].GetComponent<CardDisplay>().Display(inPlay[0].GetComponent<CardDisplay>().displayCard);
+                    //Opponent chooses
+                    opponentGodSelection();
                     //swap from god selection to action selection
                     foreach (GameObject gods in inPlay)
                     {
@@ -126,6 +142,7 @@ public class GameManager : MonoBehaviour
                 }
                 skipButton.SetActive(false);
                 //RESOLVE OPPONENT ACTION HERE BUT FOR NOW JUST SKIP AND GO STRAIHGT TO JOUST
+                handleAction("none", opponentAction());
                 state = State.Joust; //player skipped their action go to Joust
                 skipped = false; //swap back to false for next time through
             } 
@@ -136,6 +153,7 @@ public class GameManager : MonoBehaviour
                 {
                     if (action.GetComponent<CardDisplay>().selected)
                     {
+                        state = State.Busy;
                         handleAction(action.GetComponent<CardDisplay>().displayCard.name, opponentAction());
 
                         //remove the skip button & action cards
@@ -143,10 +161,7 @@ public class GameManager : MonoBehaviour
                         {
                             actions.SetActive(false);
                         }
-                        skipButton.SetActive(false);
-                        //do the action
-                        Debug.Log("Action Registered as Seleceted");
-                        state = State.Busy;
+                        skipButton.SetActive(false);                      
 
                         action.GetComponent<CardDisplay>().selected = false;
 
@@ -183,6 +198,7 @@ public class GameManager : MonoBehaviour
                 //need to destroy the copy in their deck not the one that is being referenced
                 destroyGod(playerDeck, Player.name, true);
             }
+            lastGod = Player.type;
         }
         else if (state == State.Reset)
         {
@@ -252,6 +268,128 @@ public class GameManager : MonoBehaviour
             actionCards[0].GetComponent<CardDisplay>().Display(actionCards[0].GetComponent<CardDisplay>().displayCard);
             actionCards[1].GetComponent<CardDisplay>().displayCard = actionDeck[5];
             actionCards[1].GetComponent<CardDisplay>().Display(actionCards[1].GetComponent<CardDisplay>().displayCard);
+        }
+    }
+
+    private void handleAction(string player, string opponent)
+    {
+        //handle the actions based on their names
+            //destruction
+
+            //color change
+    }
+
+    //Opponent selects/displays their action
+        //if at 1 god left use an action always
+            //if has 2 or 3 gods left use an action based on a percentage
+                //winning: 25%
+                //tie: 50%
+                //losing 75%
+    private string opponentAction()
+    {
+        return "none";
+    }
+
+
+    //Opponent selects/displays their god choice
+        //if first round choose a random god
+            //else 75% chance to choose opposite of what player picked last round
+            //25% chance to be random
+                //random number generated 1-100
+    private void opponentGodSelection()
+    {
+        float temp = Random.Range(0.0f, 10.0f);
+        Debug.Log("random float value: " + temp);
+        if (temp > 75.0f || lastGod == 0) //choose a random god
+        {
+            float temp2 = Random.Range(0.0f, 1.0f);
+            if (temp2 > 0.66f)
+            {
+                locateAndDisplayOpponentGod(1);
+            }
+            else if (temp2 > 0.33f)
+            {
+                locateAndDisplayOpponentGod(2);
+            }
+            else if (temp2 >= 0.0f)
+            {
+                locateAndDisplayOpponentGod(3);
+            }
+        }
+        else if (lastGod == 1) //if there is a green god alive best option is to go green
+        {
+            if (temp < 50.0f && godAlive(2))
+            {
+                locateAndDisplayOpponentGod(2);
+            }
+            else if (godAlive(3))
+            {
+                locateAndDisplayOpponentGod(3);
+            }
+            else
+            {
+                locateAndDisplayOpponentGod(1);
+            }
+        }
+        else if (lastGod == 2 && godAlive(3)) //if there is a blue god alive best option is to go blue
+        {
+            if (temp < 50.0f && godAlive(3))
+            {
+                locateAndDisplayOpponentGod(3);
+            }
+            else if (godAlive(1))
+            {
+                locateAndDisplayOpponentGod(1);
+            }
+            else
+            {
+                locateAndDisplayOpponentGod(2);
+            }
+        }
+        else if (lastGod == 3 && godAlive(1)) //if there is a red god alive best option is to go red
+        {
+            if (temp < 50.0f && godAlive(1))
+            {
+                locateAndDisplayOpponentGod(1);
+            }
+            else if (godAlive(2))
+            {
+                locateAndDisplayOpponentGod(2);
+            }
+            else
+            {
+                locateAndDisplayOpponentGod(3);
+            }
+        }
+    }
+
+    //check if opponent godDeck has any gods left of the current type
+        //if so return true
+        //else return false
+    private bool godAlive(int type)
+    {
+        foreach (Card god in opponentDeck)
+        {
+            if (god.type == type && !god.destroyed)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    //take in the current type and go through the god deck until running into 1 that matches & isnt destroyed
+        //change the inplay[1] to that god and call the display method to update the visual
+    private void locateAndDisplayOpponentGod(int type)
+    {
+        foreach (Card god in opponentDeck)
+        {
+            if (god.type == type && !god.destroyed)
+            {
+                inPlay[1].GetComponent<CardDisplay>().displayCard = god;
+                inPlay[1].GetComponent<CardDisplay>().Display(inPlay[1].GetComponent<CardDisplay>().displayCard);
+
+                return;
+            }
         }
     }
 }

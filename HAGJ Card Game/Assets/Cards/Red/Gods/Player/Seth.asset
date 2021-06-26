@@ -17,3 +17,5 @@ MonoBehaviour:
   cardColor: {r: 0.5188679, g: 0.17866677, b: 0.17866677, a: 1}
   descriptionText: The God of Destruction
   artwork: {fileID: 21300000, guid: 148fa6183040aae488c8de3dda4aaddb, type: 3}
+  destroyed: 0
+  action: 0

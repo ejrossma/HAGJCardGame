@@ -415,12 +415,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   godDeck:
-  - {fileID: 11400000, guid: 6edf74a9037b2944a97562a65bd88198, type: 2}
-  - {fileID: 11400000, guid: f69b239ca4506e24bb4f48806fe8a277, type: 2}
-  - {fileID: 11400000, guid: 7e0a73c4fa3013e448b99e5837bf2478, type: 2}
-  - {fileID: 11400000, guid: 6878050c579ceef48beabbfb8bd87fcf, type: 2}
-  - {fileID: 11400000, guid: b7f844c6db7d6ed4e834efe86bb1ad9e, type: 2}
-  - {fileID: 11400000, guid: fdfd4a15496055240bc241779263b097, type: 2}
+  - {fileID: 11400000, guid: 1e8f7a02a8ef20943b313a6a9576e08d, type: 2}
+  - {fileID: 11400000, guid: ba29659e5f587a14ebbd538b3dd09163, type: 2}
+  - {fileID: 11400000, guid: 3bb75673c7ca8e141be6e28a0e0e35b5, type: 2}
+  - {fileID: 11400000, guid: eb09b79b211e07a4b9dcaf326ab2e33b, type: 2}
+  - {fileID: 11400000, guid: cb1f2fdee2557b54fb0d291c1aa6b251, type: 2}
+  - {fileID: 11400000, guid: 643cfa7d78adf3a4b8c8ac34f98ff093, type: 2}
   maat: 3
   loser: 0
   godsDestroyed: 0
