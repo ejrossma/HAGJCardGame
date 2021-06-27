@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
@@ -36,6 +37,7 @@ public class GameManager : MonoBehaviour
     private GameObject resetButton;
     private GameObject joustOrResetButton;
     private GameObject postJoustButton;
+    private GameObject winLossButton;
 
     private bool skipped;
     private bool confirmed;
@@ -147,6 +149,10 @@ public class GameManager : MonoBehaviour
         temp = GameObject.FindGameObjectsWithTag("PostJoustButton");
         postJoustButton = temp[0];
         postJoustButton.SetActive(false);
+        //winlossbutton
+        temp = GameObject.FindGameObjectsWithTag("WinLossButton");
+        winLossButton = temp[0];
+        winLossButton.SetActive(false);
 
         lastGod = 0;
 
@@ -162,6 +168,14 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (opponentObj[0].GetComponent<Base>().godsDestroyed == 3)
+        {
+            state = State.GameOver;
+        }
+        if (playerObj[0].GetComponent<Base>().godsDestroyed == 3)
+        {
+            state = State.GameOver;
+        }
         if (state == State.GodSelection)
         {
             foreach (GameObject type in godDeckSymbols)
@@ -279,8 +293,45 @@ public class GameManager : MonoBehaviour
                         skipButton.SetActive(false);
                         //change to big version of card with confirm button next to it
                         if (action.GetComponent<CardDisplay>().displayCard.name == "Heka's Trickery" ||
-                            action.GetComponent<CardDisplay>().displayCard.name == "Sekhmet's Strategem")
+                            action.GetComponent<CardDisplay>().displayCard.name == "Sekhmet's Stratagem")
                         {
+
+                            //variables for SS
+                            bool red = false;
+                            bool green = false;
+                            bool blue = false;
+
+                            foreach (Card god in playerDeck)
+                            {
+                                if (god.type == 1 && god.destroyed)
+                                {
+                                    red = true;
+                                }
+                                if (god.type == 2 && god.destroyed)
+                                {
+                                    green = true;
+                                }
+                                if (god.type == 3 && god.destroyed)
+                                {
+                                    blue = true;
+                                }
+                            }
+                            foreach (Card god in opponentDeck)
+                            {
+                                if (god.type == 1 && god.destroyed)
+                                {
+                                    red = true;
+                                }
+                                if (god.type == 2 && god.destroyed)
+                                {
+                                    green = true;
+                                }
+                                if (god.type == 3 && god.destroyed)
+                                {
+                                    blue = true;
+                                }
+                            }
+
                             resetButton.SetActive(true);
                             foreach (GameObject type in typeChange)
                             {
@@ -296,9 +347,35 @@ public class GameManager : MonoBehaviour
                                 {
                                     type.SetActive(true);
                                 }
+                                Debug.Log("Red: " + red);
+                                Debug.Log("Green: " + green);
+                                Debug.Log("Blue: " + blue);
+                                Debug.Log("action name: " + action.GetComponent<CardDisplay>().displayCard.name);
+                                Debug.Log("DOES THIS MATCH ACTION NAME: " + action.GetComponent<CardDisplay>().displayCard.name);
+                                if (action.GetComponent<CardDisplay>().displayCard.name == "Sekhmet's Stratagem")
+                                {
+
+                                    if (type.GetComponent<TypeButton>().type == 1 && red == true)
+                                    {
+                                        type.SetActive(true);
+                                    }
+                                    else if (type.GetComponent<TypeButton>().type == 2 && green == true)
+                                    {
+                                        type.SetActive(true);
+                                    }
+                                    else if (type.GetComponent<TypeButton>().type == 3 && blue == true)
+                                    {
+                                        type.SetActive(true);
+                                    }
+                                    else
+                                    {
+                                        type.SetActive(false);
+                                    }
+                                }
                                 if (type.GetComponent<TypeButton>().selected)
                                 {
                                     type.SetActive(true);
+
                                     if (confirmed)
                                     {
                                         selectedAction = action.GetComponent<CardDisplay>().displayCard;
@@ -380,7 +457,7 @@ public class GameManager : MonoBehaviour
             if (Player.destroyed || Opponent.destroyed)
             {
                 GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
-                text.GetComponent<Text>().text = "Reset";
+                text.GetComponent<Text>().text = "Next";
                 if (joustOrReset && state == State.ActionDisplay)
                 {
                     state = State.Reset;
@@ -439,7 +516,7 @@ public class GameManager : MonoBehaviour
             joustOrResetButton.SetActive(false);
             Debug.Log("ENTERED POSTJOUST");
             GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
-            text.GetComponent<Text>().text = "Reset";
+            text.GetComponent<Text>().text = "Next";
             if (postJoust)
             {
                 state = State.Reset;
@@ -486,6 +563,44 @@ public class GameManager : MonoBehaviour
             Opponent.resetType();
             state = State.GodSelection;
         }
+        else if (state == State.GameOver)
+        {
+            postJoustButton.SetActive(false);
+            foreach (GameObject gods in inPlay)
+            {
+                gods.SetActive(false);
+            }
+            foreach (GameObject action in actionCards)
+            {
+                action.SetActive(false);
+            }
+            skipButton.SetActive(false);
+            foreach (GameObject actions in displayActionCards)
+            {
+                actions.SetActive(false);
+            }
+            joustOrResetButton.SetActive(false);
+            godType = GameObject.FindGameObjectsWithTag("GodType");
+            foreach (GameObject type in godType)
+            {
+                type.SetActive(false);
+            }
+            foreach (GameObject types in typeChange)
+            {
+                types.GetComponent<TypeButton>().selected = false;
+                types.SetActive(false);
+            }
+            winLossButton.SetActive(true);
+            GameObject text = winLossButton.transform.GetChild(0).gameObject;
+            if (playerObj[0].GetComponent<Base>().godsDestroyed == 3)
+            {
+                text.GetComponent<Text>().text = "YOU LOST";
+            }
+            else
+            {
+                text.GetComponent<Text>().text = "YOU WON";
+            }
+        }
     }
 
     public void setSkipped()
@@ -507,6 +622,11 @@ public class GameManager : MonoBehaviour
     public void setPostJoust()
     {
         postJoust = true;
+    }
+
+    public void changeScene()
+    {
+        SceneManager.LoadScene("MenuScene");
     }
 
     //remove any selected colors/actions
