@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour
     private GameObject[] godDeck;
     private GameObject[] inPlay;
     private GameObject[] actionCards;
+    private GameObject[] typeChange;
+    private GameObject[] godType;
 
     static public GameObject[] playerObj;
     static public GameObject[] opponentObj;
@@ -17,12 +19,18 @@ public class GameManager : MonoBehaviour
     public Card[] opponentDeck;
     public Card[] actionDeck;
 
-    //ENEMY AI HELPER VARIABLES
+    static public Card Player;
+    static public Card Opponent;
+
+    //ENEMY AI HELPER VARIABLE
     private int lastGod; //1 = red, 2 = green, 3 = blue
 
     private GameObject skipButton;
+    private GameObject confirmButton;
+    private GameObject resetButton;
 
     private bool skipped;
+    private bool confirmed;
 
     static public State state;
     /* TURN ROTATION FOR STATES
@@ -41,6 +49,7 @@ public class GameManager : MonoBehaviour
         ActionSelection,
         Joust,
         Reset,
+        GameOver,
     }
 
     // Start is called before the first frame update
@@ -48,16 +57,6 @@ public class GameManager : MonoBehaviour
     {
         //set initial state
         state = State.GodSelection;
-
-        foreach (Card god in playerDeck)
-        {
-            god.destroyed = false;
-        }
-
-        foreach (Card god in opponentDeck)
-        {
-            god.destroyed = false;
-        }
 
         //hide all elements besides choosing card from god deck
         inPlay = GameObject.FindGameObjectsWithTag("InPlay");
@@ -70,9 +69,29 @@ public class GameManager : MonoBehaviour
         {
             action.SetActive(false);
         }
+        typeChange = GameObject.FindGameObjectsWithTag("TypeChange");
+        foreach (GameObject type in typeChange)
+        {
+            type.SetActive(false);
+        }
+        //need to write a script that updates the color of this depending on the god the player chose
+        godType = GameObject.FindGameObjectsWithTag("GodType");
+        foreach (GameObject type in godType)
+        {
+            type.SetActive(false);
+        }
+        //skip button
         GameObject[] temp = GameObject.FindGameObjectsWithTag("SkipButton");
         skipButton = temp[0];
         skipButton.SetActive(false);
+        //confirm button
+        temp = GameObject.FindGameObjectsWithTag("ConfirmButton");
+        confirmButton = temp[0];
+        confirmButton.SetActive(false);
+        //reset button
+        temp = GameObject.FindGameObjectsWithTag("ResetButton");
+        resetButton = temp[0];
+        resetButton.SetActive(false);
 
         godDeck = GameObject.FindGameObjectsWithTag("GodDeck");
 
@@ -82,7 +101,21 @@ public class GameManager : MonoBehaviour
         playerDeck = playerObj[0].GetComponent<Base>().godDeck;
         opponentDeck = opponentObj[0].GetComponent<Base>().godDeck;
 
+        foreach (Card god in playerDeck)
+        {
+            god.destroyed = false;
+        }
+
+        foreach (Card god in opponentDeck)
+        {
+            god.destroyed = false;
+        }
+
         lastGod = 0;
+
+        //Player and Opponent God Information
+        Player = inPlay[0].GetComponent<CardDisplay>().displayCard;
+        Opponent = inPlay[1].GetComponent<CardDisplay>().displayCard;
 
     }
 
@@ -93,14 +126,18 @@ public class GameManager : MonoBehaviour
         {
             foreach (GameObject god in godDeck)
             {
+                if (god.GetComponent<CardDisplay>().displayCard.destroyed)
+                {
+                    god.GetComponent<CardDisplay>().slash.SetActive(true);
+                }
                 //need to add text to tell player to "Select a God"
                 if (god.GetComponent<CardDisplay>().selected)
                 {
                     state = State.Busy;
                     //change the god card for the player -> the one inside of the 'god' gameobject
                     //then display the new one
-                    inPlay[0].GetComponent<CardDisplay>().displayCard = god.GetComponent<CardDisplay>().displayCard;
-                    inPlay[0].GetComponent<CardDisplay>().Display(inPlay[0].GetComponent<CardDisplay>().displayCard);
+                    Player = god.GetComponent<CardDisplay>().displayCard;
+                    inPlay[0].GetComponent<CardDisplay>().Display(Player);
                     //Opponent chooses
                     opponentGodSelection();
                     //swap from god selection to action selection
@@ -112,6 +149,10 @@ public class GameManager : MonoBehaviour
                     {
                         action.SetActive(true);
                     }
+                    foreach (GameObject type in godType)
+                    {
+                        type.SetActive(true);
+                    }
                     skipButton.SetActive(true);
                     foreach (GameObject gods in godDeck)
                     {
@@ -119,9 +160,9 @@ public class GameManager : MonoBehaviour
                     }
                     god.GetComponent<CardDisplay>().selected = false;
 
-                    //show the correct action cards
-                    updateActionCards(inPlay[0].GetComponent<CardDisplay>().displayCard.type);
-
+                    //show the correct action cards & types
+                    updateActionCards(Player.type);
+                    updateTypes();
                     state = State.ActionSelection;
                     Debug.Log("State: " + state);
                 }
@@ -141,9 +182,16 @@ public class GameManager : MonoBehaviour
                     action.SetActive(false);
                 }
                 skipButton.SetActive(false);
-                //RESOLVE OPPONENT ACTION HERE BUT FOR NOW JUST SKIP AND GO STRAIHGT TO JOUST
+                //resolve opponent action
                 handleAction("none", opponentAction());
-                state = State.Joust; //player skipped their action go to Joust
+                if (Player.destroyed || Opponent.destroyed)  //only go to joust if both player & opponent are not destroyed
+                {
+                    state = State.Reset;
+                }
+                else
+                {
+                    state = State.Joust;
+                }
                 skipped = false; //swap back to false for next time through
             } 
             else
@@ -151,23 +199,124 @@ public class GameManager : MonoBehaviour
                 //foreach loop checking each action card to see if they were selected
                 foreach (GameObject action in actionCards)
                 {
+                    //if selected
+                        //show confirmation screen
+                            //2 types
+                                //color changing
+                                    //need to display colors & wait for player to choose one
+                                        //then show confirm button & wait for confirmation
+                                            //after confirmation handle action -> move to next state
+                                //other
+                                    //show confirm button & wait for confirmation
+                                        //after confirmation handle action -> move to next state
+
                     if (action.GetComponent<CardDisplay>().selected)
                     {
-                        state = State.Busy;
-                        handleAction(action.GetComponent<CardDisplay>().displayCard.name, opponentAction());
-
-                        //remove the skip button & action cards
-                        foreach (GameObject actions in actionCards)
+                        //hide the other action
+                        foreach (GameObject otherAction in actionCards)
                         {
-                            actions.SetActive(false);
+                            if (!otherAction.GetComponent<CardDisplay>().selected)
+                            {
+                                otherAction.SetActive(false);
+                            }
                         }
-                        skipButton.SetActive(false);                      
-
-                        action.GetComponent<CardDisplay>().selected = false;
-
-                        //if both gods arent destroyed yet continue onto the joust
-                        state = State.Joust;
-
+                        //if something is selected remove the skip button
+                        skipButton.SetActive(false);
+                        //change to big version of card with confirm button next to it
+                        if (action.GetComponent<CardDisplay>().displayCard.name == "Heka's Trickery" ||
+                            action.GetComponent<CardDisplay>().displayCard.name == "Sekhmet's Strategem")
+                        {
+                            resetButton.SetActive(true);
+                            foreach (GameObject type in typeChange)
+                            {
+                                bool selected = false;
+                                foreach (GameObject otherTypes in typeChange)
+                                {
+                                    if (otherTypes.GetComponent<TypeButton>().selected)
+                                    {
+                                        selected = true;
+                                    }
+                                }
+                                if (selected == false)
+                                {
+                                    type.SetActive(true);
+                                }
+                                if (type.GetComponent<TypeButton>().selected)
+                                {
+                                    type.SetActive(true);
+                                    if (confirmed)
+                                    {
+                                        state = State.Busy;
+                                        confirmed = false;
+                                        type.GetComponent<TypeButton>().confirmType();
+                                        //add place for actions to be presented once chosen
+                                        handleAction(action.GetComponent<CardDisplay>().displayCard.name, opponentAction());
+                                        action.GetComponent<CardDisplay>().selected = false;
+                                        confirmButton.SetActive(false);
+                                        resetButton.SetActive(false);
+                                        foreach (GameObject types in typeChange)
+                                        {
+                                            types.GetComponent<TypeButton>().selected = false;
+                                            types.SetActive(false);
+                                        }
+                                        //if both gods arent destroyed yet continue onto the joust
+                                        if (Player.destroyed || Opponent.destroyed)
+                                        {
+                                            state = State.Reset;
+                                        }
+                                        else
+                                        {
+                                            state = State.Joust;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //hide the other action
+                                        foreach (GameObject otherTypes in typeChange)
+                                        {
+                                            if (!otherTypes.GetComponent<TypeButton>().selected)
+                                            {
+                                                otherTypes.SetActive(false);
+                                            }
+                                        }
+                                        confirmButton.SetActive(true);
+                                    }
+                                }
+                            } 
+                        }
+                        else
+                        {
+                            confirmButton.SetActive(true);
+                            resetButton.SetActive(true);
+                            if (confirmed)
+                            {
+                                state = State.Busy;
+                                //add place for actions to be presented once chosen
+                                handleAction(action.GetComponent<CardDisplay>().displayCard.name, opponentAction());
+                                //remove the skip button & action cards
+                                foreach (GameObject actions in actionCards)
+                                {
+                                    actions.SetActive(false);
+                                }
+                                confirmButton.SetActive(false);
+                                resetButton.SetActive(false);
+                                action.GetComponent<CardDisplay>().selected = false;
+                                foreach (GameObject types in typeChange)
+                                {
+                                    types.GetComponent<TypeButton>().selected = false;
+                                    types.SetActive(false);
+                                }
+                                //if both gods arent destroyed yet continue onto the joust
+                                if (Player.destroyed || Opponent.destroyed)
+                                {
+                                    state = State.Reset;
+                                }
+                                else
+                                {
+                                    state = State.Joust;
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -175,11 +324,8 @@ public class GameManager : MonoBehaviour
         }
         else if (state == State.Joust)
         {
-            //Player and Opponent God Information
-            Card Player = inPlay[0].GetComponent<CardDisplay>().displayCard;
-            Card Opponent = inPlay[1].GetComponent<CardDisplay>().displayCard;
-            Debug.Log("3 Beats 1, 1 Beats 2, 2 Beats 3 \n"
-                      + "Player: " + Player.type + " vs. Opponent: " + Opponent.type);
+            confirmButton.SetActive(false);
+            resetButton.SetActive(false);
 
             if (Player.type == Opponent.type)
             {
@@ -215,6 +361,18 @@ public class GameManager : MonoBehaviour
             {
                 gods.SetActive(true);
             }
+            godType = GameObject.FindGameObjectsWithTag("GodType");
+            foreach (GameObject type in godType)
+            {
+                type.SetActive(false);
+            }
+            foreach (GameObject types in typeChange)
+            {
+                types.GetComponent<TypeButton>().selected = false;
+                types.SetActive(false);
+            }
+            Player.resetType();
+            Opponent.resetType();
             state = State.GodSelection;
         }
     }
@@ -224,6 +382,32 @@ public class GameManager : MonoBehaviour
         skipped = true;
     }
 
+    public void setConfirmed()
+    {
+        confirmed = true;
+    }
+
+    //remove any selected colors/actions
+        //show only the 2 actions and the skip button
+    public void resetActionSelection()
+    {
+        foreach (GameObject action in actionCards)
+        {
+            action.GetComponent<CardDisplay>().selected = false;
+            action.SetActive(true);
+        }
+        foreach (GameObject types in typeChange)
+        {
+            types.GetComponent<TypeButton>().selected = false;
+            types.SetActive(false);
+        }
+        skipButton.SetActive(true);
+        confirmButton.SetActive(false);
+        resetButton.SetActive(false);
+    }
+
+
+    //find and destroy the god from either a joust or an action card destroying it
     private void destroyGod(Card[] deck, string godName, bool player)
     {
         foreach (Card god in deck)
@@ -235,11 +419,19 @@ public class GameManager : MonoBehaviour
                 {
                     playerObj[0].GetComponent<Base>().godsDestroyed++;
                     Debug.Log("Player Gods Destroyed: " + playerObj[0].GetComponent<Base>().godsDestroyed);
+                    if (playerObj[0].GetComponent<Base>().godsDestroyed == 3)
+                    {
+                        state = State.GameOver;
+                    }
                 }
                 else
                 {
                     opponentObj[0].GetComponent<Base>().godsDestroyed++;
                     Debug.Log("Opponent Gods Destroyed: " + opponentObj[0].GetComponent<Base>().godsDestroyed);
+                    if (opponentObj[0].GetComponent<Base>().godsDestroyed == 3)
+                    {
+                        state = State.GameOver;
+                    }
                 }
                 state = State.Reset;
             }
@@ -271,23 +463,95 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    //update the types for the player and opponent to reinforce the god choice
+    private void updateTypes()
+    {
+        godType[0].GetComponent<GodType>().displayType(Player.type);
+        godType[1].GetComponent<GodType>().displayType(Opponent.type);
+    }
+
+    //takes in the player and opponent's actions
+        //if both gods are still alive after the action phase color changes will read the changed type variable and enact the color change
+        //the actions are enacted here not in the selection for the player or the god
+        //god's colors were changed in the 
     private void handleAction(string player, string opponent)
     {
-        //handle the actions based on their names
-            //destruction
+        Debug.Log("PLAYER ACTION: " + player + " OPPONENT ACTION: " + opponent);
 
-            //color change
+
+
+
+        //if the player or opponent used an action take away a maat
+        if (player != "none")
+        {
+            playerObj[0].GetComponent<Base>().maat--;
+        }
+        if (opponent != "none")
+        {
+            opponentObj[0].GetComponent<Base>().maat--;
+        }
+
+
     }
+
 
     //Opponent selects/displays their action
         //if at 1 god left use an action always
             //if has 2 or 3 gods left use an action based on a percentage
-                //winning: 25%
-                //tie: 50%
-                //losing 75%
+                //WINNING: 35%  TIED: 60%  LOSING: 85%
+
     private string opponentAction()
     {
-        return "none";
+        float action = Random.Range(0.0f, 10.0f);
+        Debug.Log("Opponent Action Selection Float: " + action);
+
+        if (opponentObj[0].GetComponent<Base>().maat > 0)
+        {
+            if (opponentObj[0].GetComponent<Base>().godsDestroyed == 2) //always use an action
+            {
+                return getAction(Opponent.type);
+            }
+            else //use an action based on the action float + board state
+            {
+                if (!opponentWinning()) //85% to use an ability
+                {
+                    if (action < 8.5f) //use an action
+                    {
+                        return getAction(Opponent.type);
+                    }
+                    else //skip action
+                    {
+                        return "none";
+                    }
+                }
+                else if (Player.type == Opponent.type) //60% to use an ability
+                {
+                    if (action < 6.0f) //use an action
+                    {
+                        return getAction(Opponent.type);
+                    }
+                    else //skip action
+                    {
+                        return "none";
+                    }
+                }
+                else //35% to use an ability
+                {
+                    if (action < 3.5f) //use an action
+                    {
+                        return getAction(Opponent.type);
+                    }
+                    else //skip action
+                    {
+                        return "none";
+                    }
+                }
+            }
+        } 
+        else
+        {
+            return "none";
+        }
     }
 
 
@@ -299,7 +563,7 @@ public class GameManager : MonoBehaviour
     private void opponentGodSelection()
     {
         float temp = Random.Range(0.0f, 10.0f);
-        Debug.Log("random float value: " + temp);
+        Debug.Log("Opponent God Selection Float: " + temp);
         if (temp > 75.0f || lastGod == 0) //choose a random god
         {
             float temp2 = Random.Range(0.0f, 1.0f);
@@ -377,19 +641,194 @@ public class GameManager : MonoBehaviour
         }
         return false;
     }
+
+
+    private bool checkDead(int type)
+    {
+        foreach (Card god in opponentDeck)
+        {
+            if (god.type == type && god.destroyed)
+            {
+                return true;
+            }
+        }
+        foreach (Card god in playerDeck)
+        {
+            if (god.type == type && god.destroyed)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     //take in the current type and go through the god deck until running into 1 that matches & isnt destroyed
-        //change the inplay[1] to that god and call the display method to update the visual
+    //change the inplay[1] to that god and call the display method to update the visual
     private void locateAndDisplayOpponentGod(int type)
     {
         foreach (Card god in opponentDeck)
         {
             if (god.type == type && !god.destroyed)
             {
-                inPlay[1].GetComponent<CardDisplay>().displayCard = god;
-                inPlay[1].GetComponent<CardDisplay>().Display(inPlay[1].GetComponent<CardDisplay>().displayCard);
-
+                Opponent = god;
+                inPlay[1].GetComponent<CardDisplay>().Display(Opponent);
                 return;
             }
         }
     }
+
+    private bool opponentWinning()
+    {
+        if ((Opponent.type == 3 && Player.type == 1) || (Opponent.type == 1 && Player.type == 2) || (Opponent.type == 2 && Player.type == 3)) {
+            return true;
+        } 
+        else
+        {
+            return false;
+        }
+    }
+
+
+    //chart for choosing abilities based on matchups
+
+                //WINNING
+                    //red v green
+                        //Ammit's Feast
+                    //green v blue
+                        //Anubis's Judgement
+                    //blue v red
+                        //25%
+                            //Osiris's Resurrection
+                        //75%
+                            //Eye of Horus
+
+                //TIED
+                    //red v red
+                        //if there is a blue god that has been destroyed
+                            //50%
+                                //Ammit's Feast
+                            //50%
+                                //Sehkmet's Strategem to blue
+                        //else
+                            //Ammit's Feast
+                    //green v green
+                        //50%
+                            //Heka's Trickery to red
+                        //50%
+                            //Anubis's Judgement
+                    //blue v blue
+                        //refuse to take an action cause wouldn't result in a win no matter what
+
+                //LOSING
+                    //red v blue
+                        //if there is a green god that has been destroyed
+                            //50%
+                                //Sekhmet’s Stratagem to green
+                            //50%
+                                //Ammit’s Feast
+                        //else
+                            //Ammit’s Feast
+                    //blue v green
+                        //Osiris's Resurrection
+                    //green v red
+                        //50%
+                            //Anubis's Judgement
+                        //50%
+                            //Heka's Trickery to blue
+
+    //The 6 actions have 2 letter abreviations to represent them
+        //Ammit's Feast = AF
+        //Sehkmet's Strategem = SS
+
+        //Anubis's Judgement = AJ
+        //Heka's Trickery = HT
+
+        //Eye of Horus = EH
+        //Osiris's Resurrection = OS
+
+    private string getAction(int type)
+    {
+        float per = Random.Range(0.0f, 10.0f);
+        if (type == 1 && Player.type == 2) //winning && red
+        {
+            return "AF";
+        }
+        else if (type == 2 && Player.type == 3) //winning && green
+        {
+            return "AJ";
+        }
+        else if (type == 3 && Player.type == 1) //winning && blue
+        {
+            if (per > 7.5f) //above 75%
+            {
+                return "OS";
+            }
+            else //below 75%
+            {
+                return "EH";
+            }
+        }
+        else if (type == 1 && type == Player.type) //tied && red
+        {
+            if (checkDead(3) && per > 5.0f) //blue god destroyed && above 50%
+            {
+                //change type to blue
+                Opponent.type = 3;
+                return "SS";
+            }
+            else //below 50%
+            {
+                return "AF";
+            }
+        }
+        else if (type == 2 && type == Player.type) //tied && green
+        {
+            if (per > 5.0f) //above 50%
+            {
+                return "AJ";
+            }
+            else //below 50%
+            {
+                //change type to red
+                Opponent.type = 1;
+                return "HT";
+            }
+        }
+        else if (type == 3 && type == Player.type) //tied && blue
+        {
+            return "none";
+        }
+        else if (type == 1 && Player.type == 3) //losing && red
+        {
+            if (checkDead(2) && per > 5.0f) //if green god destroyed && above 50%
+            {
+                //change type to green
+                Opponent.type = 2;
+                return "SS";
+            }
+            else //below 50%
+            {
+                return "AF";
+            }
+
+        }
+        else if (type == 2 && Player.type == 1) //losing && green
+        {
+            if (per > 5.0f) //above 50%
+            {
+                return "AJ";
+            }
+            else //below 50%
+            {
+                //change type to blue
+                Opponent.type = 3;
+                return "HT";
+            }
+        }
+        else if (type == 3 && Player.type == 2) //losing && blue
+        {
+            return "OR";
+        }
+        return "none";
+    }
+
 }

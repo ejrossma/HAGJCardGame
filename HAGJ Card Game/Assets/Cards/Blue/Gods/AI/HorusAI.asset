@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Horus
   type: 3
+  baseType: 3
   cardColor: {r: 0.1764706, g: 0.27450982, b: 0.7058824, a: 1}
   descriptionText: God of Thought
-  artwork: {fileID: 21300000, guid: 6b357812d5d733142982e511b0c60a93, type: 3}
+  artwork: {fileID: 21300000, guid: 3005d5b088271344c93abf1ac8c96c7c, type: 3}
   destroyed: 0
   action: 0

@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Isis
   type: 3
+  baseType: 3
   cardColor: {r: 0.1764706, g: 0.27450982, b: 0.7058824, a: 1}
   descriptionText: Not a Terrorist
-  artwork: {fileID: 21300000, guid: 5ca0cdcbe3a70694daa6e03a460e758c, type: 3}
+  artwork: {fileID: 21300000, guid: a89ab62210f515241a4daca2c1f51141, type: 3}
   destroyed: 0
   action: 0

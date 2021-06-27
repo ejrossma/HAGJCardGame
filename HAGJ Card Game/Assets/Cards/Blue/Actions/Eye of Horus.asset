@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80cc0b08b44afff489428955c964f165, type: 3}
-  m_Name: Amun's Splendor
+  m_Name: Eye of Horus
   m_EditorClassIdentifier: 
-  name: Amun's Splendor
+  name: Eye of Horus
   type: 0
+  baseType: 0
   cardColor: {r: 0, g: 0, b: 0, a: 0}
-  descriptionText: Your god becomes the color of target destroyed god
+  descriptionText: Your god cannot be defeated by an action card this turn
   artwork: {fileID: 21300000, guid: 33a4a646cb1e86d41b57d95d3e15e949, type: 3}
   destroyed: 0
   action: 1

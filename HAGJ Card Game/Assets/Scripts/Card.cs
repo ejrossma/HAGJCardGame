@@ -7,7 +7,8 @@ using UnityEngine;
 public class Card : ScriptableObject 
 {
     public new string name; //name of god
-    public int type; //Aggro(red) = 1, Neutral(green) = 2, Defensive(blue) = 3
+    public int type; //holds typing for joust
+    public int baseType; //Aggro(red) = 1, Neutral(green) = 2, Defensive(blue) = 3
     public Color cardColor = new Color(); //(1, 0, 0) = Aggro(red), (0, 1, 0) = Neutral(green), (0, 0, 1) = Defensive(blue)
     
     public string descriptionText; //for gods this will describe what the god represents
@@ -26,6 +27,11 @@ public class Card : ScriptableObject
         Debug.Log("name: " + name);
         Debug.Log("type: " + type);
         Debug.Log("description: " + descriptionText);
+    }
+
+    public void resetType()
+    {
+        type = baseType;
     }
 
 }

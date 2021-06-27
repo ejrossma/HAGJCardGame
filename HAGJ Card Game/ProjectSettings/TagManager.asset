@@ -9,6 +9,10 @@ TagManager:
   - Action
   - Opponent
   - SkipButton
+  - TypeChange
+  - ConfirmButton
+  - ResetButton
+  - GodType
   layers:
   - Default
   - TransparentFX

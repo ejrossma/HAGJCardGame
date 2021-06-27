@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Set
   type: 1
+  baseType: 1
   cardColor: {r: 0.5176471, g: 0.18039216, b: 0.18039216, a: 1}
   descriptionText: The God of Destruction
-  artwork: {fileID: 21300000, guid: 148fa6183040aae488c8de3dda4aaddb, type: 3}
+  artwork: {fileID: 21300000, guid: d23794b54d66ed34f9f36bc6dcde84e4, type: 3}
   destroyed: 0
   action: 0

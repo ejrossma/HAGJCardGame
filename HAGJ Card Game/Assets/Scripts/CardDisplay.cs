@@ -11,37 +11,26 @@ public class CardDisplay : MonoBehaviour
 
     public Card displayCard;
 
-    public Text nameText;
     public Image artworkImage;
-    public Text descriptionText;
-    public Image typeBox;
+    public GameObject slash;
 
-    public bool selected; //if the god has been selected to be used
+    public bool selected; //if the god/action has been selected
+    public bool confirmed; //if the god/action has been confirmed and will be used
 
     // Start is called before the first frame update
     void Start()
     {
-
-        //displayCard.Print();
-        nameText.text = displayCard.name;
-        artworkImage.sprite = displayCard.artwork;
-        descriptionText.text = displayCard.descriptionText;
-        typeBox.color = displayCard.cardColor;
-            
+        artworkImage.sprite = displayCard.artwork;  
     }
 
     public void Display(Card test)
     {
-        nameText.text = test.name;
         artworkImage.sprite = test.artwork;
-        descriptionText.text = test.descriptionText;
-        typeBox.color = test.cardColor;
     }
 
     private void OnMouseDown()
     {
         int playerMaat = GameManager.playerObj[0].GetComponent<Base>().maat;
-        Debug.Log("Maat Remaining: " + playerMaat-- + " State: " + GameManager.state + " Action: " + displayCard.action);
         if (!displayCard.destroyed && GameManager.state == GameManager.State.GodSelection)
         {
             selected = true;
@@ -53,7 +42,7 @@ public class CardDisplay : MonoBehaviour
         else if (displayCard.action && GameManager.state == GameManager.State.ActionSelection && playerMaat > 0) //if the card is an action && its action selection time && the player has more than 0 maat
         {
             selected = true;
-            Debug.Log("Action Selected \n Maat Remaining: " + playerMaat--);
+            Debug.Log("Action Selected: " + displayCard.name);
         }
     }
 }
