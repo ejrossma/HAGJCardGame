@@ -1151,6 +1151,63 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &861892364
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 861892366}
+  - component: {fileID: 861892365}
+  m_Layer: 0
+  m_Name: SoundManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &861892365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 861892364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5510559845517e54f8a3911816f75691, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ChantThing: {fileID: 8300000, guid: 77f548e7b731e7d4dbf8b1951002bbf5, type: 3}
+  dudtest3: {fileID: 8300000, guid: f95afefbd521cd84bb48439dcfe9eb7f, type: 3}
+  gameBgm: {fileID: 8300000, guid: 5e27d55da8a414e4ba84cfbcc88ff163, type: 3}
+  HappyCheer: {fileID: 8300000, guid: 91e551be1170e814ca66d56fa3966371, type: 3}
+  HappyWin: {fileID: 8300000, guid: a4357ca46b021114eaae71978bbdc2bd, type: 3}
+  mouseOver: {fileID: 8300000, guid: 60605db9b7dc66f47a57226a2acb61c4, type: 3}
+  OwwThroat: {fileID: 8300000, guid: 9539e4b7007267846b3bcb0971882301, type: 3}
+  PapyrusMouseover: {fileID: 8300000, guid: b91c7ba54a16bc44b8694a5ecab25b3b, type: 3}
+  SadCheer: {fileID: 8300000, guid: 3403064877c4b0e40ad57e6793859038, type: 3}
+  SadLoss: {fileID: 8300000, guid: 387552327438f084e975f87887d82abf, type: 3}
+  SnekShake: {fileID: 8300000, guid: 74f76a4369309714ebb3701893cee2ef, type: 3}
+  Songthing: {fileID: 8300000, guid: 4034a99a40a103f46b35c24b65d2ec50, type: 3}
+  woosh: {fileID: 8300000, guid: 72f7d726054280a478067becf6a9c02d, type: 3}
+  writing: {fileID: 8300000, guid: bec691131474c7a49b700f595a42cf83, type: 3}
+--- !u!4 &861892366
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 861892364}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 452, y: 531, z: -88.26211}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &871587269
 GameObject:
   m_ObjectHideFlags: 0
@@ -1822,7 +1879,7 @@ RectTransform:
   - {fileID: 555697465}
   - {fileID: 1889965329}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
