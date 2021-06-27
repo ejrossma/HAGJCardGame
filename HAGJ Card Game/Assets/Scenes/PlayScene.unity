@@ -3196,7 +3196,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fdfd4a15496055240bc241779263b097, type: 2}
   maat: 3
   loser: 0
-  godsDestroyed: 2
+  godsDestroyed: 0
 --- !u!4 &1589606833
 Transform:
   m_ObjectHideFlags: 0
