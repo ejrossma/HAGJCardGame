@@ -35,10 +35,12 @@ public class GameManager : MonoBehaviour
     private GameObject confirmButton;
     private GameObject resetButton;
     private GameObject joustOrResetButton;
+    private GameObject postJoustButton;
 
     private bool skipped;
     private bool confirmed;
     private bool joustOrReset;
+    private bool postJoust;
 
     static public State state;
     /* TURN ROTATION FOR STATES
@@ -55,7 +57,9 @@ public class GameManager : MonoBehaviour
         Busy,
         GodSelection,
         ActionSelection,
+        ActionDisplay,
         Joust,
+        PostJoust,
         Reset,
         GameOver,
     }
@@ -139,6 +143,10 @@ public class GameManager : MonoBehaviour
         temp = GameObject.FindGameObjectsWithTag("JoustOrResetButton");
         joustOrResetButton = temp[0];
         joustOrResetButton.SetActive(false);
+        //postjoust button
+        temp = GameObject.FindGameObjectsWithTag("PostJoustButton");
+        postJoustButton = temp[0];
+        postJoustButton.SetActive(false);
 
         lastGod = 0;
 
@@ -218,6 +226,9 @@ public class GameManager : MonoBehaviour
             //display "Select an Action or Skip" && 
             //hide "Select a God"
 
+            inPlay[0].GetComponent<CardDisplay>().slash.SetActive(false);
+            inPlay[1].GetComponent<CardDisplay>().slash.SetActive(false);
+
             if (skipped)
             {
                 state = State.Busy;
@@ -226,32 +237,16 @@ public class GameManager : MonoBehaviour
                 {
                     action.SetActive(false);
                 }
+                foreach (GameObject actions in displayActionCards)
+                {
+                    actions.SetActive(true);
+                }
+                joustOrResetButton.SetActive(true);
                 skipButton.SetActive(false);
+
                 //resolve opponent action
                 handleAction("none", opponentAction());
-                if (Player.destroyed || Opponent.destroyed)
-                {
-                    GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
-                    text.GetComponent<Text>().text = "Reset";
-                    if (joustOrReset)
-                    {
-                        Debug.Log("ENTERED RESET");
-                        state = State.Reset;
-                        joustOrReset = false;
-                    }
-                }
-                else
-                {
-                    GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
-                    text.GetComponent<Text>().text = "Joust";
-                    if (joustOrReset)
-                    {
-                        Debug.Log("ENTERED JOUST");
-                        state = State.Joust;
-                        joustOrReset = false;
-
-                    }
-                }
+                state = State.ActionDisplay;
                 skipped = false; //swap back to false for next time through
             } 
             else
@@ -327,32 +322,7 @@ public class GameManager : MonoBehaviour
                                         action.SetActive(false);
                                         joustOrResetButton.SetActive(true);
                                         //if both gods arent destroyed yet continue onto the joust
-                                        if (Player.destroyed || Opponent.destroyed)
-                                        {
-                                            Debug.Log("PLAYER OR OPPONENT DESTROYED");
-                                            GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
-                                            text.GetComponent<Text>().text = "Reset";
-                                            if (joustOrReset)
-                                            {
-                                                Debug.Log("ENTERED RESET");
-                                                state = State.Reset;
-                                                joustOrReset = false;
-                                            }
-
-                                        }
-                                        else
-                                        {
-                                            Debug.Log("PLAYER OR OPPONENT NOT DESTROYED");
-                                            GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
-                                            text.GetComponent<Text>().text = "Joust";
-                                            Debug.Log(joustOrReset);
-                                            if (joustOrReset)
-                                            {
-                                                Debug.Log("ENTERED JOUST");
-                                                state = State.Joust;
-                                                joustOrReset = false;
-                                            }
-                                        }
+                                        state = State.ActionDisplay;
                                     }
                                     else
                                     {
@@ -393,34 +363,8 @@ public class GameManager : MonoBehaviour
                                 confirmButton.SetActive(false);
                                 resetButton.SetActive(false);
                                 action.GetComponent<CardDisplay>().selected = false;
-                                foreach (GameObject types in typeChange)
-                                {
-                                    types.GetComponent<TypeButton>().selected = false;
-                                    types.SetActive(false);
-                                }
-                                //if both gods arent destroyed yet continue onto the joust
-                                if (Player.destroyed || Opponent.destroyed)
-                                {
-                                    GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
-                                    text.GetComponent<Text>().text = "Reset";
-                                    if (joustOrReset)
-                                    {
-                                        Debug.Log("ENTERED RESET");
-                                        state = State.Reset;
-                                        joustOrReset = false;
-                                    }
-                                }
-                                else
-                                {
-                                    GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
-                                    text.GetComponent<Text>().text = "Joust";
-                                    if (joustOrReset)
-                                    {
-                                        Debug.Log("ENTERED JOUST");
-                                        state = State.Joust;
-                                        joustOrReset = false;
-                                    }
-                                }
+                                state = State.ActionDisplay;
+                                confirmed = false;
                             }
                         }
                     }
@@ -428,15 +372,38 @@ public class GameManager : MonoBehaviour
 
             }
         }
+        else if (state == State.ActionDisplay)
+        {
+            Debug.Log(joustOrReset);
+            Debug.Log("ENTERED ACTIONDISPLAY");
+            joustOrResetButton.SetActive(true);
+            if (Player.destroyed || Opponent.destroyed)
+            {
+                GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
+                text.GetComponent<Text>().text = "Reset";
+                if (joustOrReset && state == State.ActionDisplay)
+                {
+                    state = State.Reset;
+                    joustOrReset = false;
+                }
+            }
+            else
+            {
+                GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
+                text.GetComponent<Text>().text = "Joust";
+                if (joustOrReset && state == State.ActionDisplay)
+                {
+                    Debug.Log("MOVING TO JOUST");
+                    state = State.Joust;
+                    joustOrReset = false;
+                }
+            }
+        }
         else if (state == State.Joust)
         {
+            Debug.Log("ENTERED JOUST");
             confirmButton.SetActive(false);
             resetButton.SetActive(false);
-            foreach (GameObject action in displayActionCards)
-            {
-                action.SetActive(false);
-            }
-            joustOrResetButton.SetActive(false);
             foreach (GameObject type in typeChange)
             {
                 type.SetActive(false);
@@ -444,24 +411,49 @@ public class GameManager : MonoBehaviour
             if (Player.type == Opponent.type)
             {
                 Debug.Log("Tie");
-                state = State.Reset;
+                state = State.PostJoust;
             }
             else if ((Player.type == 3 && Opponent.type == 1) || (Player.type == 1 && Opponent.type == 2) || (Player.type == 2 && Opponent.type == 3))
             {
                 Debug.Log("Player Wins");
                 //need to destroy the copy in their deck not the one that is being referenced
                 destroyGod(opponentDeck, Opponent.name, false);
+                state = State.PostJoust;
+                inPlay[1].GetComponent<CardDisplay>().slash.SetActive(true);
             }
             else
             {
                 Debug.Log("Opponent Wins");
                 //need to destroy the copy in their deck not the one that is being referenced
                 destroyGod(playerDeck, Player.name, true);
+                state = State.PostJoust;
+                inPlay[0].GetComponent<CardDisplay>().slash.SetActive(true);
+
             }
             lastGod = Player.type;
+            joustOrReset = false;
+        }
+        else if (state == State.PostJoust)
+        {
+            postJoustButton.SetActive(true);
+            joustOrResetButton.SetActive(false);
+            Debug.Log("ENTERED POSTJOUST");
+            GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
+            text.GetComponent<Text>().text = "Reset";
+            if (postJoust)
+            {
+                state = State.Reset;
+                postJoustButton.SetActive(false);
+                foreach (GameObject action in displayActionCards)
+                {
+                    action.SetActive(false);
+                }
+                postJoust = false;
+            }
         }
         else if (state == State.Reset)
         {
+            postJoustButton.SetActive(false);
             foreach (GameObject gods in inPlay)
             {
                 gods.SetActive(false);
@@ -475,6 +467,11 @@ public class GameManager : MonoBehaviour
             {
                 gods.SetActive(true);
             }
+            foreach (GameObject actions in displayActionCards)
+            {
+                actions.SetActive(false);
+            }
+            joustOrResetButton.SetActive(false);
             godType = GameObject.FindGameObjectsWithTag("GodType");
             foreach (GameObject type in godType)
             {
@@ -505,6 +502,11 @@ public class GameManager : MonoBehaviour
     {
         joustOrReset = true;
         Debug.Log("ENTERED SETJOUSTORRESET");
+    }
+
+    public void setPostJoust()
+    {
+        postJoust = true;
     }
 
     //remove any selected colors/actions
@@ -553,7 +555,6 @@ public class GameManager : MonoBehaviour
                         state = State.GameOver;
                     }
                 }
-                state = State.Reset;
             }
         }
     }
@@ -626,6 +627,24 @@ public class GameManager : MonoBehaviour
             godType[1].GetComponent<GodType>().displayType(false);
             inPlay[1].GetComponent<CardDisplay>().Display(Opponent);
             //update opponent symbol
+        }
+
+        //all cases where player is destroyed
+        if ((player == "Anubis's Judgement" && opponent == "none") ||
+            (opponent == "AF" && (player != "Eye of Horus" && player != "Ammit's Feast" && player != "Anubis's Judgement")) ||
+            (opponent == "AJ" && (player != "Eye of Horus" && player != "Ammit's Feast" && player != "Anubis's Judgement")))
+        {
+            destroyGod(playerDeck, Player.name, true);
+            inPlay[0].GetComponent<CardDisplay>().slash.SetActive(true);
+        }
+
+        //all cases where opponent is destroyed
+        if ((opponent == "AJ" && player == "none") || 
+            (player == "Ammit's Feast" && (opponent != "EH" && opponent != "AF" && opponent != "AJ")) || 
+            (player == "Anubis's Judgement" && (opponent != "EH" && opponent != "AF" && opponent != "AJ")))
+        {
+            destroyGod(opponentDeck, Opponent.name, false);
+            inPlay[1].GetComponent<CardDisplay>().slash.SetActive(true);
         }
 
 

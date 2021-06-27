@@ -16,6 +16,7 @@ TagManager:
   - GodDeckSymbols
   - DisplayAction
   - JoustOrResetButton
+  - PostJoustButton
   layers:
   - Default
   - TransparentFX
