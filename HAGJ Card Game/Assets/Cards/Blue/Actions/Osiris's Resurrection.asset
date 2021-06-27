@@ -17,6 +17,6 @@ MonoBehaviour:
   baseType: 0
   cardColor: {r: 0, g: 0, b: 0, a: 0}
   descriptionText: If your god would lose the joust this turn, you win instead
-  artwork: {fileID: 21300000, guid: 33a4a646cb1e86d41b57d95d3e15e949, type: 3}
+  artwork: {fileID: 21300000, guid: 298e1a5bac82ca3478e819f20e8c77e0, type: 3}
   destroyed: 0
   action: 1

@@ -17,6 +17,6 @@ MonoBehaviour:
   baseType: 0
   cardColor: {r: 0, g: 0, b: 0, a: 0}
   descriptionText: Your god becomes the color of target destroyed god
-  artwork: {fileID: 21300000, guid: 33a4a646cb1e86d41b57d95d3e15e949, type: 3}
+  artwork: {fileID: 21300000, guid: 1980393eac8d89f42880dfdef0b0bbcf, type: 3}
   destroyed: 0
   action: 1

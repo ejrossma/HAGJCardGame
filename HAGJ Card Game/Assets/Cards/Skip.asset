@@ -10,14 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80cc0b08b44afff489428955c964f165, type: 3}
-  m_Name: Heka's Trickery
+  m_Name: Skip
   m_EditorClassIdentifier: 
-  name: Heka's Trickery
+  name: Skip
   type: 0
   baseType: 0
   cardColor: {r: 0, g: 0, b: 0, a: 0}
-  descriptionText: Change the color of your god to the color of your choice until
-    the end of turn
-  artwork: {fileID: 21300000, guid: a7c53c13b3ba09f40b3645764f90252c, type: 3}
+  descriptionText: 
+  artwork: {fileID: 21300000, guid: c16502b599178e64391db99b90601166, type: 3}
   destroyed: 0
   action: 1

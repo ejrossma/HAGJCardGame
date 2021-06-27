@@ -13,6 +13,9 @@ TagManager:
   - ConfirmButton
   - ResetButton
   - GodType
+  - GodDeckSymbols
+  - DisplayAction
+  - JoustOrResetButton
   layers:
   - Default
   - TransparentFX

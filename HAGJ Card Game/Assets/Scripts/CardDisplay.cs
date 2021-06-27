@@ -13,6 +13,11 @@ public class CardDisplay : MonoBehaviour
 
     public Image artworkImage;
     public GameObject slash;
+    public GameObject typeImage;
+
+    public Sprite red;
+    public Sprite green;
+    public Sprite blue;
 
     public bool selected; //if the god/action has been selected
     public bool confirmed; //if the god/action has been confirmed and will be used
@@ -20,12 +25,28 @@ public class CardDisplay : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        artworkImage.sprite = displayCard.artwork;  
+        Display(displayCard);
     }
 
     public void Display(Card test)
     {
         artworkImage.sprite = test.artwork;
+        if (test.type == 1)
+        {
+            typeImage.GetComponent<Image>().sprite = red;
+        }
+        else if (test.type == 2)
+        {
+            typeImage.GetComponent<Image>().sprite = green;
+        }
+        else if (test.type == 3)
+        {
+            typeImage.GetComponent<Image>().sprite = blue;
+        }
+        else if (test.type == 0)
+        {
+            typeImage.SetActive(false);
+        }
     }
 
     private void OnMouseDown()
