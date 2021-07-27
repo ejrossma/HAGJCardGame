@@ -18,6 +18,10 @@ TagManager:
   - JoustOrResetButton
   - PostJoustButton
   - WinLossButton
+  - PlayerGod
+  - OpponentGod
+  - Gem
+  - Heart
   layers:
   - Default
   - TransparentFX

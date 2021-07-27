@@ -5,16 +5,20 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
+using System.Runtime.InteropServices.ComTypes;
 
 public class GameManager : MonoBehaviour
 {
     private GameObject[] godDeck;
-    private GameObject[] inPlay;
+    private GameObject[] pGod;
+    private GameObject[] oGod;
     private GameObject[] actionCards;
     private GameObject[] typeChange;
     private GameObject[] godType;
     private GameObject[] godDeckSymbols;
     private GameObject[] displayActionCards;
+    private GameObject[] favorGems;
+    private GameObject[] healthIndicator;
 
     static public GameObject[] playerObj;
     static public GameObject[] opponentObj;
@@ -29,6 +33,9 @@ public class GameManager : MonoBehaviour
     private Card selectedAction;
     private Card opponentSelectedAction;
 
+    public Sprite forJoust;
+    public Sprite forNext;
+
     //ENEMY AI HELPER VARIABLE
     private int lastGod; //1 = red, 2 = green, 3 = blue
 
@@ -38,11 +45,17 @@ public class GameManager : MonoBehaviour
     private GameObject joustOrResetButton;
     private GameObject postJoustButton;
     private GameObject winLossButton;
+    
+    private GameObject playerFavor;
+    private GameObject opponentFavor;
+    private GameObject playerHealth;
+    private GameObject opponentHealth;
 
     private bool skipped;
     private bool confirmed;
     private bool joustOrReset;
     private bool postJoust;
+    private bool osFlip; //flip the joust if osiris's resurrection was activated
 
     static public State state;
     /* TURN ROTATION FOR STATES
@@ -78,6 +91,12 @@ public class GameManager : MonoBehaviour
         playerDeck = playerObj[0].GetComponent<Base>().godDeck;
         opponentDeck = opponentObj[0].GetComponent<Base>().godDeck;
 
+        playerFavor = GameObject.Find("CardCanvas/ActionAndJoust/Player/PlayerFavor");
+        opponentFavor = GameObject.Find("CardCanvas/ActionAndJoust/Opponent/OpponentFavor");
+
+        playerHealth = GameObject.Find("CardCanvas/ActionAndJoust/Player/PlayerHealth");
+        opponentHealth = GameObject.Find("CardCanvas/ActionAndJoust/Opponent/OpponentHealth");
+
         foreach (Card god in playerDeck)
         {
             god.destroyed = false;
@@ -91,8 +110,13 @@ public class GameManager : MonoBehaviour
         }
 
         //hide all elements besides choosing card from god deck
-        inPlay = GameObject.FindGameObjectsWithTag("InPlay");
-        foreach (GameObject god in inPlay)
+        pGod = GameObject.FindGameObjectsWithTag("PlayerGod");
+        foreach (GameObject god in pGod)
+        {
+            god.SetActive(false);
+        }
+        oGod = GameObject.FindGameObjectsWithTag("OpponentGod");
+        foreach (GameObject god in oGod)
         {
             god.SetActive(false);
         }
@@ -129,6 +153,18 @@ public class GameManager : MonoBehaviour
             god.SetActive(false);
             god.GetComponent<CardDisplay>().Display(god.GetComponent<CardDisplay>().displayCard);
         }
+        //favor indicator for player
+        favorGems = GameObject.FindGameObjectsWithTag("Gem");
+        foreach (GameObject gem in favorGems)
+        {
+            gem.SetActive(false);
+        }
+        //health indicator for player
+        healthIndicator = GameObject.FindGameObjectsWithTag("Heart");
+        foreach (GameObject heart in healthIndicator)
+        {
+            heart.SetActive(false);
+        }
         //skip button
         GameObject[] temp = GameObject.FindGameObjectsWithTag("SkipButton");
         skipButton = temp[0];
@@ -157,8 +193,8 @@ public class GameManager : MonoBehaviour
         lastGod = 0;
 
         //Player and Opponent God Information
-        Player = inPlay[0].GetComponent<CardDisplay>().displayCard;
-        Opponent = inPlay[1].GetComponent<CardDisplay>().displayCard;
+        Player = pGod[0].GetComponent<CardDisplay>().displayCard;
+        Opponent = oGod[0].GetComponent<CardDisplay>().displayCard;
 
         godType[0].GetComponent<GodType>().displayType(true);
         godType[1].GetComponent<GodType>().displayType(false);
@@ -199,12 +235,16 @@ public class GameManager : MonoBehaviour
                     //change the god card for the player -> the one inside of the 'god' gameobject
                     //then display the new one
                     Player = god.GetComponent<CardDisplay>().displayCard;
-                    inPlay[0].GetComponent<CardDisplay>().Display(Player);
+                    pGod[0].GetComponent<CardDisplay>().Display(Player);
                     godType[0].GetComponent<GodType>().displayType(true);
                     //Opponent chooses
                     opponentGodSelection();
                     //swap from god selection to action selection
-                    foreach (GameObject gods in inPlay)
+                    foreach (GameObject gods in oGod)
+                    {
+                        gods.SetActive(true);
+                    }
+                    foreach (GameObject gods in pGod)
                     {
                         gods.SetActive(true);
                     }
@@ -216,6 +256,14 @@ public class GameManager : MonoBehaviour
                     {
                         type.SetActive(true);
                     }
+                    foreach (GameObject gem in favorGems)
+                    {
+                        gem.SetActive(true);
+                    }
+                    foreach (GameObject heart in healthIndicator)
+                    {
+                        heart.SetActive(true);
+                    }
                     skipButton.SetActive(true);
                     foreach (GameObject gods in godDeck)
                     {
@@ -225,13 +273,13 @@ public class GameManager : MonoBehaviour
                     {
                         type.SetActive(false);
                     }
+
                     god.GetComponent<CardDisplay>().selected = false;
 
                     //show the correct action cards & types
                     updateActionCards(Player.type);
                     updateTypes();
                     state = State.ActionSelection;
-                    Debug.Log("State: " + state);
                 }
             }
         }
@@ -240,8 +288,8 @@ public class GameManager : MonoBehaviour
             //display "Select an Action or Skip" && 
             //hide "Select a God"
 
-            inPlay[0].GetComponent<CardDisplay>().slash.SetActive(false);
-            inPlay[1].GetComponent<CardDisplay>().slash.SetActive(false);
+            pGod[0].GetComponent<CardDisplay>().slash.SetActive(false);
+            oGod[0].GetComponent<CardDisplay>().slash.SetActive(false);
 
             if (skipped)
             {
@@ -347,11 +395,6 @@ public class GameManager : MonoBehaviour
                                 {
                                     type.SetActive(true);
                                 }
-                                Debug.Log("Red: " + red);
-                                Debug.Log("Green: " + green);
-                                Debug.Log("Blue: " + blue);
-                                Debug.Log("action name: " + action.GetComponent<CardDisplay>().displayCard.name);
-                                Debug.Log("DOES THIS MATCH ACTION NAME: " + action.GetComponent<CardDisplay>().displayCard.name);
                                 if (action.GetComponent<CardDisplay>().displayCard.name == "Sekhmet's Stratagem")
                                 {
 
@@ -451,13 +494,10 @@ public class GameManager : MonoBehaviour
         }
         else if (state == State.ActionDisplay)
         {
-            Debug.Log(joustOrReset);
-            Debug.Log("ENTERED ACTIONDISPLAY");
             joustOrResetButton.SetActive(true);
             if (Player.destroyed || Opponent.destroyed)
             {
-                GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
-                text.GetComponent<Text>().text = "Next";
+                joustOrResetButton.GetComponent<Image>().sprite = forNext;
                 if (joustOrReset && state == State.ActionDisplay)
                 {
                     state = State.Reset;
@@ -466,11 +506,9 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
-                text.GetComponent<Text>().text = "Joust";
+                joustOrResetButton.GetComponent<Image>().sprite = forJoust;
                 if (joustOrReset && state == State.ActionDisplay)
                 {
-                    Debug.Log("MOVING TO JOUST");
                     state = State.Joust;
                     joustOrReset = false;
                 }
@@ -478,35 +516,13 @@ public class GameManager : MonoBehaviour
         }
         else if (state == State.Joust)
         {
-            Debug.Log("ENTERED JOUST");
             confirmButton.SetActive(false);
             resetButton.SetActive(false);
             foreach (GameObject type in typeChange)
             {
                 type.SetActive(false);
             }
-            if (Player.type == Opponent.type)
-            {
-                Debug.Log("Tie");
-                state = State.PostJoust;
-            }
-            else if ((Player.type == 3 && Opponent.type == 1) || (Player.type == 1 && Opponent.type == 2) || (Player.type == 2 && Opponent.type == 3))
-            {
-                Debug.Log("Player Wins");
-                //need to destroy the copy in their deck not the one that is being referenced
-                destroyGod(opponentDeck, Opponent.name, false);
-                state = State.PostJoust;
-                inPlay[1].GetComponent<CardDisplay>().slash.SetActive(true);
-            }
-            else
-            {
-                Debug.Log("Opponent Wins");
-                //need to destroy the copy in their deck not the one that is being referenced
-                destroyGod(playerDeck, Player.name, true);
-                state = State.PostJoust;
-                inPlay[0].GetComponent<CardDisplay>().slash.SetActive(true);
-
-            }
+            joustHandler();
             lastGod = Player.type;
             joustOrReset = false;
         }
@@ -514,9 +530,6 @@ public class GameManager : MonoBehaviour
         {
             postJoustButton.SetActive(true);
             joustOrResetButton.SetActive(false);
-            Debug.Log("ENTERED POSTJOUST");
-            GameObject text = joustOrResetButton.transform.GetChild(0).gameObject;
-            text.GetComponent<Text>().text = "Next";
             if (postJoust)
             {
                 state = State.Reset;
@@ -531,13 +544,25 @@ public class GameManager : MonoBehaviour
         else if (state == State.Reset)
         {
             postJoustButton.SetActive(false);
-            foreach (GameObject gods in inPlay)
+            foreach (GameObject gods in oGod)
+            {
+                gods.SetActive(false);
+            }
+            foreach (GameObject gods in pGod)
             {
                 gods.SetActive(false);
             }
             foreach (GameObject action in actionCards)
             {
                 action.SetActive(false);
+            }
+            foreach (GameObject gem in favorGems)
+            {
+                gem.SetActive(false);
+            }
+            foreach (GameObject heart in healthIndicator)
+            {
+                heart.SetActive(false);
             }
             skipButton.SetActive(false);
             foreach (GameObject gods in godDeck)
@@ -566,7 +591,11 @@ public class GameManager : MonoBehaviour
         else if (state == State.GameOver)
         {
             postJoustButton.SetActive(false);
-            foreach (GameObject gods in inPlay)
+            foreach (GameObject gods in oGod)
+            {
+                gods.SetActive(false);
+            }
+            foreach (GameObject gods in pGod)
             {
                 gods.SetActive(false);
             }
@@ -589,6 +618,14 @@ public class GameManager : MonoBehaviour
             {
                 types.GetComponent<TypeButton>().selected = false;
                 types.SetActive(false);
+            }
+            foreach (GameObject gem in favorGems)
+            {
+                gem.SetActive(false);
+            }
+            foreach (GameObject heart in healthIndicator)
+            {
+                heart.SetActive(false);
             }
             winLossButton.SetActive(true);
             GameObject text = winLossButton.transform.GetChild(0).gameObject;
@@ -616,7 +653,6 @@ public class GameManager : MonoBehaviour
     public void setJoustOrReset()
     {
         joustOrReset = true;
-        Debug.Log("ENTERED SETJOUSTORRESET");
     }
 
     public void setPostJoust()
@@ -660,6 +696,7 @@ public class GameManager : MonoBehaviour
                 if (player)
                 {
                     playerObj[0].GetComponent<Base>().godsDestroyed++;
+                    playerHealth.GetComponent<PlayerHealth>().updateHealth();
                     Debug.Log("Player Gods Destroyed: " + playerObj[0].GetComponent<Base>().godsDestroyed);
                     if (playerObj[0].GetComponent<Base>().godsDestroyed == 3)
                     {
@@ -669,6 +706,7 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     opponentObj[0].GetComponent<Base>().godsDestroyed++;
+                    opponentHealth.GetComponent<OpponentHealth>().updateHealth();
                     Debug.Log("Opponent Gods Destroyed: " + opponentObj[0].GetComponent<Base>().godsDestroyed);
                     if (opponentObj[0].GetComponent<Base>().godsDestroyed == 3)
                     {
@@ -732,7 +770,7 @@ public class GameManager : MonoBehaviour
         {
             displayActionCards[1].GetComponent<CardDisplay>().Display(selectedAction);
             godType[0].GetComponent<GodType>().displayType(true);
-            inPlay[0].GetComponent<CardDisplay>().Display(Player);
+            pGod[0].GetComponent<CardDisplay>().Display(Player);
             //update player symbol
         }
         
@@ -745,37 +783,48 @@ public class GameManager : MonoBehaviour
         {
             displayActionCards[0].GetComponent<CardDisplay>().Display(opponentSelectedAction);
             godType[1].GetComponent<GodType>().displayType(false);
-            inPlay[1].GetComponent<CardDisplay>().Display(Opponent);
+            oGod[0].GetComponent<CardDisplay>().Display(Opponent);
             //update opponent symbol
         }
 
         //all cases where player is destroyed
         if ((player == "Anubis's Judgement" && opponent == "none") ||
             (opponent == "AF" && (player != "Eye of Horus" && player != "Ammit's Feast" && player != "Anubis's Judgement")) ||
-            (opponent == "AJ" && (player != "Eye of Horus" && player != "Ammit's Feast" && player != "Anubis's Judgement")))
+            (opponent == "AJ" && (player != "Eye of Horus" && player != "Ammit's Feast" && player != "Anubis's Judgement" && player != "none")))
         {
             destroyGod(playerDeck, Player.name, true);
-            inPlay[0].GetComponent<CardDisplay>().slash.SetActive(true);
+            pGod[0].GetComponent<CardDisplay>().slash.SetActive(true);
         }
 
         //all cases where opponent is destroyed
         if ((opponent == "AJ" && player == "none") || 
             (player == "Ammit's Feast" && (opponent != "EH" && opponent != "AF" && opponent != "AJ")) || 
-            (player == "Anubis's Judgement" && (opponent != "EH" && opponent != "AF" && opponent != "AJ")))
+            (player == "Anubis's Judgement" && (opponent != "EH" && opponent != "AF" && opponent != "AJ" && opponent != "none")))
         {
             destroyGod(opponentDeck, Opponent.name, false);
-            inPlay[1].GetComponent<CardDisplay>().slash.SetActive(true);
+            oGod[0].GetComponent<CardDisplay>().slash.SetActive(true);
         }
 
+        //if player or opponent are not destroyed & one of them chose OS
+        if (!Player.destroyed && !Opponent.destroyed && (player == "Osiris's Resurrection" || opponent == "OS"))
+        {
+            osFlip = true;
+        } 
+        else
+        {
+            osFlip = false;
+        }
 
         //if the player or opponent used an action take away a maat
         if (player != "none")
         {
             playerObj[0].GetComponent<Base>().maat--;
+            playerFavor.GetComponent<PlayerFavor>().updateFavor();
         }
         if (opponent != "none")
         {
             opponentObj[0].GetComponent<Base>().maat--;
+            opponentFavor.GetComponent<OpponentFavor>().updateFavor();
         }
 
 
@@ -790,7 +839,6 @@ public class GameManager : MonoBehaviour
     private string opponentAction()
     {
         float action = Random.Range(0.0f, 10.0f);
-        Debug.Log("Opponent Action Selection Float: " + action);
 
         if (opponentObj[0].GetComponent<Base>().maat > 0)
         {
@@ -850,7 +898,6 @@ public class GameManager : MonoBehaviour
     private void opponentGodSelection()
     {
         float temp = Random.Range(0.0f, 10.0f);
-        Debug.Log("Opponent God Selection Float: " + temp);
         if (temp > 75.0f || lastGod == 0) //choose a random god
         {
             float temp2 = Random.Range(0.0f, 1.0f);
@@ -914,6 +961,60 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    //handles joust & consider's if Osiris's Resurrection was played
+    private void joustHandler()
+    {
+        if (Player.type == Opponent.type)
+        {
+            Debug.Log("Tie");
+            state = State.PostJoust;
+            return;
+        }
+        //if OS was played
+        if (osFlip)
+        {
+            if ((Player.type == 3 && Opponent.type == 1) || (Player.type == 1 && Opponent.type == 2) || (Player.type == 2 && Opponent.type == 3))
+            {
+                Debug.Log("Opponent Wins");
+                //need to destroy the copy in their deck not the one that is being referenced
+                destroyGod(playerDeck, Player.name, true);
+                state = State.PostJoust;
+                pGod[0].GetComponent<CardDisplay>().slash.SetActive(true);
+                return;
+            }
+            else
+            {
+                Debug.Log("Player Wins");
+                //need to destroy the copy in their deck not the one that is being referenced
+                destroyGod(opponentDeck, Opponent.name, false);
+                state = State.PostJoust;
+                oGod[0].GetComponent<CardDisplay>().slash.SetActive(true);
+                return;
+            }
+        }
+        else
+        {
+            if ((Player.type == 3 && Opponent.type == 1) || (Player.type == 1 && Opponent.type == 2) || (Player.type == 2 && Opponent.type == 3))
+            {
+                Debug.Log("Player Wins");
+                //need to destroy the copy in their deck not the one that is being referenced
+                destroyGod(opponentDeck, Opponent.name, false);
+                state = State.PostJoust;
+                oGod[0].GetComponent<CardDisplay>().slash.SetActive(true);
+                return;
+            }
+            else
+            {
+                Debug.Log("Opponent Wins");
+                //need to destroy the copy in their deck not the one that is being referenced
+                destroyGod(playerDeck, Player.name, true);
+                state = State.PostJoust;
+                pGod[0].GetComponent<CardDisplay>().slash.SetActive(true);
+                return;
+            }
+        }
+    }
+
     //check if opponent godDeck has any gods left of the current type
         //if so return true
         //else return false
@@ -957,7 +1058,7 @@ public class GameManager : MonoBehaviour
             if (god.type == type && !god.destroyed)
             {
                 Opponent = god;
-                inPlay[1].GetComponent<CardDisplay>().Display(Opponent);
+                oGod[0].GetComponent<CardDisplay>().Display(Opponent);
                 godType[1].GetComponent<GodType>().displayType(false);
                 return;
             }
